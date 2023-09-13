@@ -86,6 +86,10 @@ The data retrieved from this endpoint can be leveraged in various ways, includin
 curl -X GET 'http://localhost:10000/getTweets?coin=BTC&sentiment=negative'
 ```
 
+## Credits
+
+This project is based on the [Twitter Crawler Template](https://github.com/GET-Store-CAT/twitter-crawler) provided by GET Store CAT and Koii. A big thank you to the creators and maintainers of the template for laying the groundwork for this project.
+
 ## Contribution
 
 Feel free to fork the project and submit pull requests for any enhancements or bug fixes. Please adhere to the existing coding style and commit message format.
