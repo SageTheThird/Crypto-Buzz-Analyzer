@@ -12,9 +12,14 @@ const TASK_NODE_PORT = Number(process.argv[11]);
 
 const app = express();
 
+const users = [
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 3, name: 'Charlie' },
+];
 console.log('SETTING UP EXPRESS');
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send(users);
 });
 
 app.listen(EXPRESS_PORT, () => {
@@ -30,5 +35,5 @@ module.exports = {
   K2_NODE_URL,
   SERVICE_URL,
   STAKE,
-  TASK_NODE_PORT
+  TASK_NODE_PORT,
 };

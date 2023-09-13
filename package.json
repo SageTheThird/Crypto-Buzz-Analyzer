@@ -6,12 +6,12 @@
   "scripts": {
     "go": "yarn && yarn start > log.txt |  tail -f log.txt | yarn test:api ",
     "test": "node tests/test-one-round.js",
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "webpack": "webpack",
     "webpack:prod": "webpack --mode production",
-    "webpack:deploy" : "yarn webpack:prod && yarn deploy",
+    "webpack:deploy": "yarn webpack:prod && yarn deploy",
     "deploy": "create-task-cli",
-    "whammy" : "yarn webpack:deploy"
+    "whammy": "yarn webpack:deploy"
   },
   "author": "",
   "license": "ISC",
@@ -32,10 +32,12 @@
     "puppeteer-chromium-resolver": "^19.1.0",
     "request": "^2.88.2",
     "selenium-webdriver": "^4.8.2",
+    "sentiment": "^5.0.2",
     "twitter-api-v2": "^1.14.2",
     "web3.storage": "^4.4.0"
   },
   "devDependencies": {
+    "nodemon": "^3.0.1",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0"
   }

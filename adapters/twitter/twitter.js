@@ -6,6 +6,8 @@ const cheerio = require('cheerio');
 var crypto = require('crypto');
 const { Web3Storage, File } = require('web3.storage');
 const Data = require('../../model/data');
+const NLP = require('./../../helpers/nlp');
+const nlp = new NLP();
 
 /**
  * Twitter
@@ -233,14 +235,36 @@ class Twitter extends Adapter {
     const likeCount = tweet_record.eq(1).text();
     const shareCount = tweet_record.eq(2).text();
     const viewCount = tweet_record.eq(3).text();
+
     if (tweet_user && tweet_text) {
-      data = {
-        user: tweet_user,
-        content: tweet_text.replace(/\n/g, '<br>'),
-        comment: commentCount,
+      const tweetContent = tweet_text.replace(/\n/g, '<br>');
+      const sentimentAnalysis = nlp.analyzeText(tweetContent, {
         like: likeCount,
         share: shareCount,
+        comment: commentCount,
         view: viewCount,
+      });
+
+      // Identify the relevant search term for this tweet
+      let relevantCoin = null;
+      for (const coinTerm of query.searchTerm) {
+        const [hashtag, symbol] = coinTerm.split(' OR ');
+        if (tweet_text.includes(hashtag) || tweet_text.includes(symbol)) {
+          relevantCoin = coinTerm;
+          break;
+        }
+      }
+      data = {
+        url: url,
+        user: tweet_user,
+        content: tweet_text.replace(/\n/g, '<br>'),
+        comments: commentCount,
+        likes: likeCount,
+        shares: shareCount,
+        views: viewCount,
+        sentiment: sentimentAnalysis.sentiment, // Adding sentiment analysis
+        sentimentScore: sentimentAnalysis.score,
+        coin: relevantCoin, // Adding the relevant search term to the data
       };
     }
     // TODO  - queue users to be crawled?
@@ -285,7 +309,7 @@ class Twitter extends Adapter {
       if (url) {
         var data = await this.parseItem(url, query);
         this.parsed[url] = data;
-
+        data.url = url;
         console.log('got tweet item', data);
 
         const file = await makeFileFromObjectWithName(data, url);
@@ -294,6 +318,15 @@ class Twitter extends Adapter {
           id: url,
           round: round || 0,
           cid: cid,
+          user: data.user,
+          comments: data.comments,
+          likes: data.likes,
+          shares: data.shares,
+          views: data.views,
+          content: data.content,
+          sentiment: data.sentiment,
+          sentimentScore: data.sentimentScore,
+          coin: data.coin, // Including the search term in the data to be stored
         });
 
         if (query.recursive === true) {

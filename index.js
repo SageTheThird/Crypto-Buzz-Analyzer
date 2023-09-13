@@ -5,7 +5,6 @@ const {
   taskNodeAdministered,
 } = require('./namespaceWrapper');
 
-
 /**
  * setup
  * @description sets up the task node, particularly the inter-process communication to start and stop the task
@@ -34,25 +33,46 @@ async function setup() {
       coreLogic.auditDistribution(m.roundNumber);
     }
   });
-
 }
 
 if (taskNodeAdministered) {
   setup();
 }
 
-if (app) {
-  //  Write your Express Endpoints here.
-  //  For Example
-  //  app.post('/accept-cid', async (req, res) => {})
+const Data = require('./model/data'); // Adjust the path to point to your data.js file
+const { closeGauge } = require('puppeteer-chromium-resolver/lib/util');
+// Adjust the parameters as necessary
 
-  // Sample API that return your task state
+if (app) {
+  app.get('/getTrendingCoins', async (req, res) => {
+    const trendingCoins =
+      await require('./helpers/coingecko').fetchTrendingCoins();
+    return res.status(200).json({ data: trendingCoins });
+  });
+
+  app.get('/getTweets', async (req, res) => {
+    const { id, sentiment, user, coin, sentimentScore } = req.query;
+
+    //http://localhost:10000/getTweets?sentiment=negative&sentimentScore=-1&coin=BTC
+
+    // Create a query object with only the parameters that are not undefined
+    const queryObject = {};
+    if (id) queryObject.id = id;
+    if (sentiment) queryObject.sentiment = sentiment;
+    if (user) queryObject.user = user;
+    if (coin) queryObject.coin = coin;
+    if (sentimentScore) queryObject.sentimentScore = Number(sentimentScore);
+    const dataInstance = await namespaceWrapper.getDb();
+    const data = await dataInstance.find(queryObject);
+    return res.status(200).json({ data: data });
+  });
 
   app.get('/taskState', async (req, res) => {
     const state = await namespaceWrapper.getTaskState();
+    console.log((await namespaceWrapper.getDb()).count('positive'));
     console.log('TASK STATE', state);
 
     res.status(200).json({ taskState: state });
   });
-  app.use('/api/', require('./routes') );
+  app.use('/api/', require('./routes'));
 }
